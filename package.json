@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "name": "webgl-experiments",
+  "version": "1.0.0",
+  "description": "experiments while im learning webgl",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Liam Seper",
+  "license": "ISC"
+}
