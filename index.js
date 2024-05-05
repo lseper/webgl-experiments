@@ -32,13 +32,15 @@ const fragmentShaderSource = `#version 300 es
 // fragment shaders don't have a default precision so we need
 // to pick one. highp is a good default. It means "high precision"
 precision highp float;
+
+// uniform is a way to pass data from our JavaScript to our shaders
+uniform vec4 u_color;
  
 // we need to declare an output for the fragment shader
 out vec4 outColor;
  
 void main() {
-  // Just set the output to a constant reddish-purple
-  outColor = vec4(1, 0, 0.5, 1);
+  outColor = u_color;
 }
 `
 
@@ -78,21 +80,11 @@ const program = createProgram(gl, vertexShader, fragmentShader);
 
 const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 const resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+const colorLocation = gl.getUniformLocation(program, "u_color");
 
 const positionBuffer = gl.createBuffer();
 
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-// three 2d points
-var positions = [
-    10, 20,
-    80, 20,
-    10, 30,
-    10, 30,
-    80, 20,
-    80, 30,
-];
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
 const vao = gl.createVertexArray();
 gl.bindVertexArray(vao);
@@ -130,7 +122,7 @@ function drawTriangle1() {
     gl.drawArrays(primitiveType, offsetDraw, count);
 }
 
-function drawRectangles1() {
+function drawRectangle1() {
     // Pass in the canvas resolution so we can convert from
     // pixels to clip space in the shader
     gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
@@ -141,5 +133,43 @@ function drawRectangles1() {
     gl.drawArrays(primitiveType, offset, count);
 }
 
-drawRectangles1();
+function setRectangle(gl, x, y, width, height) {
+    const x1 = x
+    const x2 = x + width;
+    const y1 = y;
+    const y2 = y + height;
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        x1, y1,
+        x2, y1,
+        x1, y2,
+        x1, y2,
+        x2, y1,
+        x2, y2,
+    ]), gl.STATIC_DRAW);
+}
+
+function randomInt(range) {
+    return Math.floor(Math.random() * range);
+}
+
+function drawRectangles2(num_rectangles) {
+    console.log('drawRectangles2');
+    for (let i = 0; i < num_rectangles; i++) {
+        setRectangle(gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300));
+        // set color
+        gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
+        // draw
+        const primitiveType = gl.TRIANGLES;
+        // Pass in the canvas resolution so we can convert from
+        // pixels to clip space in the shader
+        gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+        // draw
+        var offset = 0;
+        var count = 6; // six vertices in two triangles that make up rectangle
+        gl.drawArrays(primitiveType, offset, count);
+    }
+}
+
+drawRectangles2(50);
 
